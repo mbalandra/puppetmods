@@ -1,1 +1,85 @@
 
+class ks_base_script { …}
+# == Class: ks_base_script::ks_base_script_base
+# This class takes care of everything that the KICKSTART script mantioned
+# 
+# Each one configures packages, service, users and so on ...
+#
+# === Parameters
+#
+# No parameters needed
+#
+# === Variables
+#
+# No variables needed
+#
+class ks_script {
+    sysctl
+
+
+ exec {"echo never > /sys/kernel/mm/transparent_hugepage/enable":
+ path=>"/usr/bin:/usr/sbin:/bin",
+ onlyif=>"test -f /sys/kernel/mm/transparent_hugepage/enabled”
+}
+
+
+
+
+
+  #include fusionio
+
+  #include gemrc
+
+  # class {'sightline':
+  #       ensure => 'absent'  # Will Uninstall it
+  #       }
+  
+  # update hostsfile from DZ depot
+  #include base::hostsfile
+
+  #unless $::operatingsystem == 'CentOS' {
+  #  include base::s_check
+  #}
+
+
+  #  include vmtools
+  #}
+
+  #include snmp
+
+  if $::manufacturer == 'HP' and $::osfamily == 'RedHat' {
+    include spp
+  }
+
+  #include logrotate
+  #include bash
+
+  #grub::kernel_param { 'crash_kernel':
+  #  param => 'crashkernel',
+  #  value => '512M@0M'
+  #}
+
+  file { '/etc/facter/facts.d/environment.txt':
+    ensure  => present,
+    mode    => '0644',
+    content => "environment=${environment}",
+    noop    => false,
+  }
+
+  file { '/etc/facter/facts.d/role.txt':
+    ensure  => present,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    #content => template("${module_name}/puppetenv.erb"),
+    noop    => false,
+  }
+
+  
+  package { 'tightvnc':
+    #provider => zypper,
+    ensure => installed,
+    name   => $package,
+  }
+  
+}
